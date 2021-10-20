@@ -50,7 +50,7 @@ module Spgateway
     end
 
     def generate_invoice(params = {})
-      param_required! params, [:MerchantOrderNo, :Status, :Category, :BuyerName, :CarrierType, :CarrierNum, :BuyerEmail, :PrintFlag, :TaxType, :TaxRate, :Amt, :TaxAmt, :TotalAmt, :ItemName, :ItemCount, :ItemUnit, :ItemPrice, :ItemAmt]
+      param_required! params, [:MerchantOrderNo, :Status, :Category, :BuyerName, :BuyerEmail, :PrintFlag, :TaxType, :TaxRate, :Amt, :TaxAmt, :TotalAmt, :ItemName, :ItemCount, :ItemUnit, :ItemPrice, :ItemAmt]
 
       post_params = {
         RespondType: 'JSON',
