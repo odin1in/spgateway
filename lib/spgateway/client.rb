@@ -4,6 +4,7 @@ require 'cgi'
 require 'digest'
 require 'spgateway/errors'
 require 'spgateway/core_ext/hash'
+require 'json'
 
 module Spgateway
   class Client # :nodoc:
@@ -18,6 +19,10 @@ module Spgateway
     CREDITCARD_DEAUTHORIZE_API_ENDPOINTS = {
       test: 'https://ccore.spgateway.com/API/CreditCard/Cancel',
       production: 'https://core.spgateway.com/API/CreditCard/Cancel'
+    }.freeze
+    EZPAY_INVOICE_API_ENDPOINTS = {
+      test: 'https://cinv.ezpay.com.tw/Api/invoice_issue',
+      production: 'https://inv.ezpay.com.tw/Api/invoice_issue'
     }.freeze
     NEED_CHECK_VALUE_APIS = [
       :query_trade_info # Transaction API
@@ -42,6 +47,19 @@ module Spgateway
       stringified_keys = params.stringify_keys
       check_code = stringified_keys.delete('CheckCode')
       make_check_code(stringified_keys) == check_code
+    end
+
+    def generate_invoice(params = {})
+      param_required! params, [:MerchantOrderNo, :Status, :Category, :BuyerName, :CarrierType, :CarrierNum, :BuyerEmail, :PrintFlag, :TaxType, :TaxRate, :Amt, :TaxAmt, :TotalAmt, :ItemName, :ItemCount, :ItemUnit, :ItemPrice, :ItemAmt]
+
+      post_params = {
+        RespondType: 'JSON',
+        Version: '1.5',
+        TimeStamp: Time.now.to_i
+      }.merge!(params)
+      
+      res = request :ezpay_invoice_issue, post_params
+      JSON.parse(res.body)
     end
 
     def generate_mpg_params(params = {})
@@ -176,12 +194,19 @@ module Spgateway
       Digest::SHA256.hexdigest(padded).upcase!
     end
 
-    def encode_post_data(data)
+    def encode_post_data(type, data)
+      case type
+      when :query_trade_info, :credit_card_deauthorize, :credit_card_collect_refund
+        key, iv = @options[:hash_key], @options[:hash_iv]
+      when :ezpay_invoice_issue
+        key, iv = @options[:ezpay_invoice_hash_key], @options[:ezpay_invoice_hash_iv]
+      end
+
       cipher = OpenSSL::Cipher::AES256.new(:CBC)
       cipher.encrypt
       cipher.padding = 0
-      cipher.key = @options[:hash_key]
-      cipher.iv = @options[:hash_iv]
+      cipher.key = key
+      cipher.iv = iv
       data = add_padding(data)
       encrypted = cipher.update(data) + cipher.final
       encrypted.unpack('H*').first
@@ -223,6 +248,8 @@ module Spgateway
         api_url = CREDITCARD_DEAUTHORIZE_API_ENDPOINTS[@options[:mode]]
       when :credit_card_collect_refund
         api_url = CREDITCARD_COLLECT_REFUND_API_ENDPOINTS[@options[:mode]]
+      when :ezpay_invoice_issue
+        api_url = EZPAY_INVOICE_API_ENDPOINTS[@options[:mode]]
       end
 
       if NEED_CHECK_VALUE_APIS.include?(type)
@@ -230,7 +257,7 @@ module Spgateway
       else
         post_params = {
           MerchantID_: @options[:merchant_id],
-          PostData_: encode_post_data(URI.encode(params.map { |key, value| "#{key}=#{value}" }.join('&')))
+          PostData_: encode_post_data(type, params.map { |key, value| "#{key}=#{URI.encode_www_form_component(value)}" }.join('&'))
         }
       end
 

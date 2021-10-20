@@ -38,13 +38,13 @@ class TestSpgateway < MiniTest::Test
 
   def test_encoding_post_data_1
     data = 'abcdefghijklmnop'
-    encrypted = @client.encode_post_data data
+    encrypted = @client.encode_post_data :query_trade_info, data
     assert_equal 'b91d3ece42c203729b38ae004e96efb9b64c41eeb074cad7ebafa3973181d233', encrypted
   end
 
   def test_encoding_post_data_2
     data = 'abcdefghijklmnopqrstuvwxyzABCDEF'
-    encrypted = @client.encode_post_data data
+    encrypted = @client.encode_post_data :query_trade_info, data
     assert_equal 'b91d3ece42c203729b38ae004e96efb90109ee25f7861b6bb33891be88d9a799484f0d3ccee9a094e9fad6d51db716ff2df7a5137639aaf94fba4f309e2af173', encrypted
   end
 
@@ -185,6 +185,30 @@ class TestSpgateway < MiniTest::Test
 
     assert_equal 'SUCCESS', result['Status']
   end
+
+  def test_generate_invoice
+    skip 'test this if there is public sandbox'
+    result = @client.generate_invoice({ MerchantOrderNo: "0000000003#{rand(1000)}",
+                               Status: 1,
+                               Category: 'B2C',
+                               BuyerName: 'test1234',
+                               CarrierType: 2,
+                               CarrierNum: 'test@test.tw',
+                               BuyerEmail: 'test@test.tw',
+                               PrintFlag: "N",
+                               TaxType: 1,
+                               TaxRate: "5",
+                               Amt: "190",
+                               TaxAmt: "10",
+                               TotalAmt: "200",
+                               ItemName: '包包|包包',
+                               ItemCount: '1|1',
+                               ItemUnit: '個|個',
+                               ItemPrice: '100|100',
+                               ItemAmt: '100|100'})
+    assert_equal 'SUCCESS', result['Status']
+  end
+
 
   def test_generate_credit_card_period_params
     result = @client.generate_credit_card_period_params(
