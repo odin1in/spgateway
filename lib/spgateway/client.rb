@@ -9,16 +9,16 @@ require 'json'
 module Spgateway
   class Client # :nodoc:
     TRANSACTION_API_ENDPOINTS = {
-      test: 'https://ccore.spgateway.com/API/QueryTradeInfo',
-      production: 'https://core.spgateway.com/API/QueryTradeInfo'
+      test: 'https://ccore.newebpay.com/API/QueryTradeInfo',
+      production: 'https://core.newebpay.com/API/QueryTradeInfo'
     }.freeze
     CREDITCARD_COLLECT_REFUND_API_ENDPOINTS = {
-      test: 'https://ccore.spgateway.com/API/CreditCard/Close',
-      production: 'https://core.spgateway.com/API/CreditCard/Close'
+      test: 'https://ccore.newebpay.com/API/CreditCard/Close',
+      production: 'https://core.newebpay.com/API/CreditCard/Close'
     }.freeze
     CREDITCARD_DEAUTHORIZE_API_ENDPOINTS = {
-      test: 'https://ccore.spgateway.com/API/CreditCard/Cancel',
-      production: 'https://core.spgateway.com/API/CreditCard/Cancel'
+      test: 'https://ccore.newebpay.com/API/CreditCard/Cancel',
+      production: 'https://core.newebpay.com/API/CreditCard/Cancel'
     }.freeze
     EZPAY_INVOICE_API_ENDPOINTS = {
       test: 'https://cinv.ezpay.com.tw/Api/invoice_issue',

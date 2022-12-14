@@ -3,7 +3,7 @@
 
 # 智付通 Spgateway
 
-這是智付通 API 的 Ruby 包裝，更多資訊請參閱 [API 文件專區](https://www.spgateway.com/info/site_description/api_description)。
+這是智付通 API 的 Ruby 包裝，更多資訊請參閱 [API 文件專區](https://www.newebpay.com/info/site_description/api_description)。
 
 - 這不是 Rails 插件，只是個 API 包裝。
 - 使用時只需要傳送需要的參數即可，不用產生檢查碼，`spgateway_client` 會自己產生。
